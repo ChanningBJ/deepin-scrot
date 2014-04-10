@@ -30,6 +30,11 @@ from utils import makeMenuItem, getFormatTime
 from constant import DEFAULT_FILENAME
 saveFiletype = "png"
 
+def saveToFile(fillscreen=True,fileName,fileType):
+    pixbuf = getScrotPixbuf(fullscreen)
+    pixbuf.save(fileName, fileType)
+    print "Save snapshot to %s" % (fileName)
+
 def openFileDialog(fullscreen=True, filetype='png'):
     '''Save file to file.'''
     pixbuf = getScrotPixbuf(fullscreen)
@@ -93,7 +98,27 @@ def openFileDialog(fullscreen=True, filetype='png'):
 def setSaveFiletype(widget, filetype):
     widget.set_current_name("%s%s.%s" % (DEFAULT_FILENAME, getFormatTime(), filetype))
     saveFiletype =filetype
-       
+
+def getFileNameFileType(fileName):
+    basename = os.path.basename(fileName).split(".")
+    if len(basename)>1:
+        fileType = basename[-1]
+    else:
+        fileType = None
+    if fileType.lower() in ("png","jepg","bmp"):
+        fileName = os.path.expanduser(fileName)
+        fileName = os.path.abspath(fileName)
+        dirName = os.path.dirname(fileName)
+        if os.path.isdir(dirName):
+            return (fileName,fileType)
+        else:
+            print dirName,"do not exist or not a directory"
+            return (None,None)
+    else:
+        print "The only supported file types are png, jepg and bmp"
+        return (None,None)
+        
+    
 
 def processArguments():
     '''init processArguments '''
@@ -101,7 +126,7 @@ def processArguments():
     parser.add_option("-f", "--full", action="store_true", dest="fullscreen", help="Taking the fullscreen shot")
     parser.add_option("-w", "--window", action="store_true", dest="window", help="Taking the currently focused window")
     parser.add_option("-d", "--delay", dest="delay", type="int", help="wait NUM seconds before taking a shot", metavar="NUM")
-    
+    parser.add_option("-o", "--outfile", dest="outfile", type="str", help="Save the snapshot to a file, file type png,jepg and bmp are supported")    
     (options, args) = parser.parse_args()
     #print parser.parse_args()
     if options.fullscreen and options.window:
@@ -120,9 +145,19 @@ def processArguments():
             openFileDialog(False)
     elif options.fullscreen and options.window or options.delay:
         countdownWindow(options.delay)
-        MainScrot()
+        if options.outfile:
+            (fileName,fileType) = getFileNameFileType(options.outfile)
+            if fileName:
+                MainScrot(fileName,fileType)
+        else:
+            MainScrot()
     else:
-         MainScrot()
+        if options.outfile:
+            (fileName,fileType) = getFileNameFileType(options.outfile)
+            if fileName:
+                MainScrot(fileName,fileType)
+        else:
+            MainScrot()
         
         
 

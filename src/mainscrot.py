@@ -48,7 +48,7 @@ pygtk.require('2.0')
 class MainScrot:
     '''Main scrot.'''
 	
-    def __init__(self):
+    def __init__(self,saveFileName=None, saveFiletype="png"):
         '''Init Main scrot.'''
 
         # Init.
@@ -68,7 +68,8 @@ class MainScrot:
         self.showColorbarFlag = False 
         self.showTextWindowFlag = False
         self.textDragOffsetX = self.textDragOffsetY = 0
-        self.saveFiletype = 'png'
+        self.saveFileName = saveFileName
+        self.saveFiletype = saveFiletype
         
         self.toolbarOffsetX = 10
         self.toolbarOffsetY = 10
@@ -436,7 +437,7 @@ class MainScrot:
         self.actionCancelButton.connect("button-press-event", lambda w, e: self.destroy(self.window))
 
         self.actionFinishButton = self.createOtherButton("finish",__("Tip finish"))
-        self.actionFinishButton.connect("button-press-event", lambda w, e: self.saveSnapshot())
+        self.actionFinishButton.connect("button-press-event", lambda w, e: self.saveSnapshot(self.saveFileName,self.saveFiletype))
       
       
     def setOtherInactive(self, button):
@@ -991,7 +992,7 @@ class MainScrot:
             self.textModifyFlag = True
        
         if isDoubleClick(event) and self.action == ACTION_SELECT and self.x < ex < self.x + self.rectWidth and self.y < ey < self.y + self.rectHeight:
-            self.saveSnapshot()
+            self.saveSnapshot(self.saveFileName,self.saveFiletype)
             self.buttonRelease(widget, event)
          
 
