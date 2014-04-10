@@ -30,70 +30,125 @@ from utils import makeMenuItem, getFormatTime
 from constant import DEFAULT_FILENAME
 saveFiletype = "png"
 
-def saveToFile(fillscreen=True,fileName,fileType):
-    pixbuf = getScrotPixbuf(fullscreen)
-    pixbuf.save(fileName, fileType)
-    print "Save snapshot to %s" % (fileName)
+# def saveToFile(fillscreen=True,fileName,fileType):
+#     pixbuf = getScrotPixbuf(fullscreen)
+#     pixbuf.save(fileName, fileType)
+#     print "Save snapshot to %s" % (fileName)
 
-def openFileDialog(fullscreen=True, filetype='png'):
+def saveToFile(fullscreen=True, fileName=None):
     '''Save file to file.'''
     pixbuf = getScrotPixbuf(fullscreen)
-    dialog = gtk.FileChooserDialog(
-                                   "Save..",
-                                   None,
-                                   gtk.FILE_CHOOSER_ACTION_SAVE,
-                                   (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
-                                    gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
+
+    if fileName is None:
+        dialog = gtk.FileChooserDialog(
+                                       "Save..",
+                                       None,
+                                       gtk.FILE_CHOOSER_ACTION_SAVE,
+                                       (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
+                                        gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
+            
+        
+        dialog.set_default_response(gtk.RESPONSE_ACCEPT)
+        dialog.set_position(gtk.WIN_POS_CENTER)
+        dialog.set_local_only(True)
+        
+        dialog.set_current_folder(os.environ['HOME'])
+        dialog.set_current_name("%s%s.%s" % (DEFAULT_FILENAME, getFormatTime(), saveFiletype))
+        
+        optionMenu = gtk.OptionMenu()
+        optionMenu.set_size_request(155, -1)
+        menu = gtk.Menu()
+        menu.set_size_request(155, -1)
+        
+        pngItem = makeMenuItem('PNG (*.png)',
+                     lambda item, data: setSaveFiletype(dialog, 'png'))
+        
+        jpgItem = makeMenuItem('JPEG (*.jpeg)',
+                     lambda item, data: setSaveFiletype(dialog, 'jpeg'))
+        
+        bmpItem = makeMenuItem('BMP (*.bmp)',
+                     lambda item, data: setSaveFiletype(dialog, 'bmp'))
+        
+        menu.append(pngItem)
+        menu.append(jpgItem)
+        menu.append(bmpItem)
+        optionMenu.set_menu(menu)
+        
+        hbox = gtk.HBox()
+        hbox.pack_end(optionMenu, False, False)
+        dialog.vbox.pack_start(hbox, False, False)
+        hbox.show_all()                          
+                
+        response = dialog.run()
+            
+        if response == gtk.RESPONSE_ACCEPT:
+            fileName = dialog.get_filename()
+        dialog.destroy()
+    if fileName is None:
+        print 'Closed, no files selected'
+    else:
+        pixbuf.save(fileName, saveFiletype)
+        print "Save snapshot to %s" % (fileName)
+    
+# def openFileDialog(fullscreen=True, filetype='png'):
+#     '''Save file to file.'''
+#     pixbuf = getScrotPixbuf(fullscreen)
+#     dialog = gtk.FileChooserDialog(
+#                                    "Save..",
+#                                    None,
+#                                    gtk.FILE_CHOOSER_ACTION_SAVE,
+#                                    (gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT,
+#                                     gtk.STOCK_SAVE, gtk.RESPONSE_ACCEPT))
         
 
-    dialog.set_default_response(gtk.RESPONSE_ACCEPT)
-    dialog.set_position(gtk.WIN_POS_CENTER)
-    dialog.set_local_only(True)
+#     dialog.set_default_response(gtk.RESPONSE_ACCEPT)
+#     dialog.set_position(gtk.WIN_POS_CENTER)
+#     dialog.set_local_only(True)
         
     
-    dialog.set_current_folder(os.environ['HOME'])
-    dialog.set_current_name("%s%s.%s" % (DEFAULT_FILENAME, getFormatTime(), saveFiletype))
+#     dialog.set_current_folder(os.environ['HOME'])
+#     dialog.set_current_name("%s%s.%s" % (DEFAULT_FILENAME, getFormatTime(), saveFiletype))
 
        
         
 
-    optionMenu = gtk.OptionMenu()
-    optionMenu.set_size_request(155, -1)
-    menu = gtk.Menu()
-    menu.set_size_request(155, -1)
+#     optionMenu = gtk.OptionMenu()
+#     optionMenu.set_size_request(155, -1)
+#     menu = gtk.Menu()
+#     menu.set_size_request(155, -1)
     
-    pngItem = makeMenuItem('PNG (*.png)',
-                 lambda item, data: setSaveFiletype(dialog, 'png'))
+#     pngItem = makeMenuItem('PNG (*.png)',
+#                  lambda item, data: setSaveFiletype(dialog, 'png'))
     
-    jpgItem = makeMenuItem('JPEG (*.jpeg)',
-                 lambda item, data: setSaveFiletype(dialog, 'jpeg'))
+#     jpgItem = makeMenuItem('JPEG (*.jpeg)',
+#                  lambda item, data: setSaveFiletype(dialog, 'jpeg'))
     
-    bmpItem = makeMenuItem('BMP (*.bmp)',
-                 lambda item, data: setSaveFiletype(dialog, 'bmp'))
-    
-    
+#     bmpItem = makeMenuItem('BMP (*.bmp)',
+#                  lambda item, data: setSaveFiletype(dialog, 'bmp'))
     
     
-    menu.append(pngItem)
-    menu.append(jpgItem)
-    menu.append(bmpItem)
-    optionMenu.set_menu(menu)
     
     
-    hbox = gtk.HBox()
-    hbox.pack_end(optionMenu, False, False)
-    dialog.vbox.pack_start(hbox, False, False)
-    hbox.show_all()                          
+#     menu.append(pngItem)
+#     menu.append(jpgItem)
+#     menu.append(bmpItem)
+#     optionMenu.set_menu(menu)
+    
+    
+#     hbox = gtk.HBox()
+#     hbox.pack_end(optionMenu, False, False)
+#     dialog.vbox.pack_start(hbox, False, False)
+#     hbox.show_all()                          
             
-    response = dialog.run()
+#     response = dialog.run()
         
-    if response == gtk.RESPONSE_ACCEPT:
-        filename = dialog.get_filename()
-        pixbuf.save(filename, filetype)
-        print "Save snapshot to %s" % (filename)
-    elif response == gtk.RESPONSE_REJECT:
-        print 'Closed, no files selected'
-    dialog.destroy()
+#     if response == gtk.RESPONSE_ACCEPT:
+#         filename = dialog.get_filename()
+#         pixbuf.save(filename, filetype)
+#         print "Save snapshot to %s" % (filename)
+#     elif response == gtk.RESPONSE_REJECT:
+#         print 'Closed, no files selected'
+#     dialog.destroy()
 
 def setSaveFiletype(widget, filetype):
     widget.set_current_name("%s%s.%s" % (DEFAULT_FILENAME, getFormatTime(), filetype))
@@ -129,35 +184,31 @@ def processArguments():
     parser.add_option("-o", "--outfile", dest="outfile", type="str", help="Save the snapshot to a file, file type png,jepg and bmp are supported")    
     (options, args) = parser.parse_args()
     #print parser.parse_args()
+    (fileName,saveFileType) = (None,"png")
+    if options.outfile:
+        (fileName,saveFileType) = getFileNameFileType(options.outfile)
+        if fileName is None:
+            sys.exit(-1)
     if options.fullscreen and options.window:
         parser.error("options -f and -w are mutually exclusive")
     elif options.fullscreen:
         if options.delay:
             countdownWindow(options.delay)
-            openFileDialog()
+            saveToFile(True,fileName)
+#            openFileDialog()
         else:
-            openFileDialog()
+            saveToFile(True,fileName)
     elif options.window:
         if options.delay:
             countdownWindow(options.delay)
-            openFileDialog(False)
+            saveToFile(False,fileName)
         else:
-            openFileDialog(False)
+            saveToFile(False,fileName)
     elif options.fullscreen and options.window or options.delay:
         countdownWindow(options.delay)
-        if options.outfile:
-            (fileName,fileType) = getFileNameFileType(options.outfile)
-            if fileName:
-                MainScrot(fileName,fileType)
-        else:
-            MainScrot()
+        MainScrot(fileName,saveFileType)
     else:
-        if options.outfile:
-            (fileName,fileType) = getFileNameFileType(options.outfile)
-            if fileName:
-                MainScrot(fileName,fileType)
-        else:
-            MainScrot()
+        MainScrot(fileName,saveFileType)
         
         
 
