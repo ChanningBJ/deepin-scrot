@@ -51,6 +51,9 @@ class MainScrot:
     def __init__(self,saveFileName=None, saveFiletype="png"):
         '''Init Main scrot.'''
 
+        # The file that saves the path of last saved file
+        self.dataFileName = os.path.expanduser("~/.deepin-scrot.tmp")
+        
         # Init.
         self.action = ACTION_WINDOW
         self.width = self.height = 0
@@ -1024,7 +1027,7 @@ class MainScrot:
         dialog.set_default_response(gtk.RESPONSE_ACCEPT)
         dialog.set_position(gtk.WIN_POS_MOUSE)
         dialog.set_local_only(True)
-        dialog.set_current_folder(os.environ['HOME'])
+        dialog.set_current_folder(self.getDefaultTargetPath())
         dialog.set_current_name("%s%s.%s" % (DEFAULT_FILENAME, getFormatTime(), self.saveFiletype))
         
         optionMenu = gtk.OptionMenu()
@@ -1064,6 +1067,7 @@ class MainScrot:
         if response == gtk.RESPONSE_ACCEPT:
             filename = dialog.get_filename()
             self.saveSnapshot(filename, self.saveFiletype)
+            self.setDefaultTargetPath(os.path.dirname(filename))
             print "Save snapshot to %s" % (filename)
         elif response == gtk.RESPONSE_REJECT:
             self.adjustToolbar()
@@ -1074,6 +1078,23 @@ class MainScrot:
             print 'Closed, no files selected'
         dialog.destroy()
 
+    def setDefaultTargetPath(self,path):
+        with open(self.dataFileName,"w") as fd:
+            fd.write(path)
+
+    def getDefaultTargetPath(self,):
+        try:
+            with open(self.dataFileName) as fd:
+                defaultPath = fd.readline()
+        except IOError:
+            return os.environ['HOME']
+        if os.path.isdir(defaultPath):
+            return defaultPath
+        else:
+            return os.environ['HOME']
+                
+
+            
         
     def setSaveFiletype(self, dialog, filetype):
         ''' save filetype '''
